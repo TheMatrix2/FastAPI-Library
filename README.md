@@ -42,13 +42,9 @@ source .venv/bin/activate  # Linux/macOS
 
 ### 2. Настройка переменных окружения
 
-Создайте .env файл в корневой папке и добавьте:
+Скопируйте пример содержимого .env файла и настройте под сове окружение:
 
-DATABASE_URL=postgresql://username:password@localhost:5432/library_db
-SECRET_KEY=your_secret_key_here
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
-DEBUG=True
+```cp .env.example .env```
 
 ### 3. Настройка базы данных (если без Docker)
 
