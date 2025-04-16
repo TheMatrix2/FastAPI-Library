@@ -1,15 +1,31 @@
-from sqlalchemy import Column, UUID, Date, ForeignKey
-from uuid import uuid4
+import enum
+from datetime import datetime
+from sqlalchemy import Column, Enum, DateTime, ForeignKey, Integer, String
+from sqlalchemy.orm import relationship
 
-from . import Base
+from app.db.base import Base
+
+
+class LoanStatus(str, enum.Enum):
+    BORROWED = "borrowed"
+    RETURNED = "returned"
+    OVERDUE = "overdue"
 
 
 class Loan(Base):
     __tablename__ = "loans"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, nullable=False, index=True, default=uuid4)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
-    book_id = Column(UUID(as_uuid=True), ForeignKey("books.id"), nullable=False)
-    issue_date = Column(Date, nullable=False)
-    due_date = Column(Date, nullable=False)
-    return_date = Column(Date, nullable=True)
+    id = Column(Integer, primary_key=True, index=True)
+    book_id = Column(Integer, ForeignKey("books.id"), nullable=False)
+    reader_id = Column(Integer, ForeignKey("readers.id"), nullable=False)
+    loan_date = Column(DateTime, default=datetime.utcnow, nullable=False)
+    due_date = Column(DateTime, nullable=False)
+    return_date = Column(DateTime, nullable=True)
+    status = Column(Enum(LoanStatus), nullable=False, default=LoanStatus.BORROWED)
+
+    # Relationships
+    book = relationship("Book", back_populates="loans")
+    reader = relationship("Reader", back_populates="loans")
+
+    def __repr__(self):
+        return f"Loan {self.id}: {self.book.title} to {self.reader.first_name} {self.reader.last_name}"

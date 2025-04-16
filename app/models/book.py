@@ -1,23 +1,23 @@
-from sqlalchemy import Column, UUID, String, ForeignKey, Date, Integer, Table
+from sqlalchemy import Column, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
-from uuid import uuid4
-from . import Base
 
-book_author = Table(
-    "book_author",
-    Base.metadata,
-    Column('book_id', UUID, ForeignKey("books.id"), primary_key=True),
-    Column('author_id', UUID, ForeignKey("authors.id"), primary_key=True)
-)
+from app.db.base import Base
 
 
 class Book(Base):
-    __tablename__ = 'books'
+    __tablename__ = "books"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, nullable=False, index=True, default=uuid4)
-    title = Column(String, nullable=False)
-    description = Column(String, nullable=False)
-    genre = Column(String, nullable=False)
-    publication_date = Column(Date, nullable=False)
-    available_copies = Column(Integer, nullable=False, default=0)
-    authors = relationship('Author', secondary=book_author, back_populates='books')
+    id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(255), nullable=False, index=True)
+    isbn = Column(String(13), unique=True, index=True, nullable=False)
+    description = Column(Text, nullable=True)
+    publication_year = Column(Integer, nullable=True)
+    quantity = Column(Integer, default=1, nullable=False)
+    author_id = Column(Integer, ForeignKey("authors.id"), nullable=False)
+
+    # Relationships
+    author = relationship("Author", back_populates="books")
+    loans = relationship("Loan", back_populates="book")
+
+    def __repr__(self):
+        return f"{self.title} ({self.isbn})"

@@ -1,19 +1,24 @@
-from sqlalchemy import Column, UUID, String, Enum
-from uuid import uuid4
 import enum
+from sqlalchemy import Boolean, Column, Enum, Integer, String
+from sqlalchemy.orm import relationship
 
-from . import Base
+from app.db.base import Base
 
 
-class Role(str, enum.Enum):
-    admin = "admin"
-    reader = "reader"
+class UserRole(str, enum.Enum):
+    ADMIN = "admin"
+    READER = "reader"
 
 
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, nullable=False, index=True, default=uuid4)
-    username = Column(String, unique=True, nullable=False, index=True)
-    password_hash = Column(String, nullable=False)
-    role = Column(Enum(Role), nullable=False, default=Role.reader)
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String, unique=True, index=True, nullable=False)
+    username = Column(String, unique=True, index=True, nullable=False)
+    hashed_password = Column(String, nullable=False)
+    role = Column(Enum(UserRole), nullable=False, default=UserRole.READER)
+    is_active = Column(Boolean, default=True)
+
+    # Relationship with Reader model
+    reader = relationship("Reader", back_populates="user", uselist=False)
