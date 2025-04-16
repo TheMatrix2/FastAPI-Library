@@ -1,17 +1,35 @@
-from pydantic_settings import BaseSettings
-from dotenv import load_dotenv
 import os
+from typing import Any, Dict, List, Optional, Union
+from pydantic import AnyHttpUrl, PostgresDsn, field_validator
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    database_uri: str = "sqlite:///./test.db"
-    echo_sql: bool = True
-    test: bool = False
-    project_name: str = "My FastAPI project"
-    oauth_token_secret: str = "my_dev_secret"
-    debug: bool = True
+    API_V1_STR: str = "/api/v1"
+    SECRET_KEY: str
+    ALGORITHM: str
+    ACCESS_TOKEN_EXPIRE_MINUTES: int
 
+    DEBUG: bool = False
+    LOG_LEVEL: str = "INFO"
 
-load_dotenv()
+    # CORS configuration
+    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
+
+    @field_validator("BACKEND_CORS_ORIGINS", mode="before")
+    def assemble_cors_origins(cls, v: Union[str, List[str]]) -> Union[List[str], str]:
+        if isinstance(v, str) and not v.startswith("["):
+            return [i.strip() for i in v.split(",")]
+        elif isinstance(v, (list, str)):
+            return v
+        raise ValueError(v)
+
+    DATABASE_URL: PostgresDsn
+    TEST_DATABASE_URL: Optional[PostgresDsn] = None
+
+    class Config:
+        env_file = ".env"
+        case_sensitive = True
+
 
 settings = Settings()
