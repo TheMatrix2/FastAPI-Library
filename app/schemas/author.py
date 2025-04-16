@@ -1,22 +1,38 @@
-from pydantic import BaseModel, UUID4, Field
-from datetime import date
-from typing import Optional
+from typing import List, Optional
+from pydantic import BaseModel
+
 
 class AuthorBase(BaseModel):
-    name: str = Field(..., min_length=2, max_length=100)
+    first_name: str
+    last_name: str
     biography: Optional[str] = None
-    birth_date: Optional[date] = None
-
-    class Config:
-        arbitrary_types_allowed = True
 
 
 class AuthorCreate(AuthorBase):
     pass
 
 
-class Author(AuthorBase):
-    id: UUID4
+class AuthorUpdate(AuthorBase):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    biography: Optional[str] = None
+
+
+class AuthorResponse(AuthorBase):
+    id: int
+
+
+class AuthorInDBBase(AuthorBase):
+    id: int
 
     class Config:
         from_attributes = True
+
+
+class Author(AuthorInDBBase):
+    pass
+
+
+class AuthorWithBooks(Author):
+    from app.schemas.book import Book
+    books: List[Book] = []
